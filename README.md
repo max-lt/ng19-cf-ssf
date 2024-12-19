@@ -97,4 +97,22 @@ npx esbuild --bundle dist/server/server.mjs \
 npx wrangler pages dev dist/browser --port 4200 --compatibility-date=2024-12-05
 ```
 
+## Create a Bun adapter
+
+### Install Bun types
+
+```bash
+npm i --save-dev @types/bun
+```
+
+### Create the Bun adapter
+
+See [bun.ts](bun.ts) for the code.
+
+### Run the worker locally with Bun
+
+```bash
+bun run bun.ts
+```
+
 [1]: https://www.lechat.dev/blog/2024/angular-ssr-with-cloudflare-pages-and-bun
