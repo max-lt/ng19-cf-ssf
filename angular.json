@@ -40,7 +40,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/ng19-cf-ssr",
+            "outputPath": "dist",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [],
@@ -51,17 +51,22 @@
                 "input": "public"
               }
             ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "styles": ["src/styles.css"],
             "scripts": [],
             "server": "src/main.server.ts",
-            "prerender": true,
+            "prerender": false,
             "ssr": {
               "entry": "src/server.ts"
             }
           },
           "configurations": {
+            "worker": {
+              "tsConfig": "tsconfig.worker.json",
+              "ssr": {
+                "entry": "src/worker.ts",
+                "experimentalPlatform": "neutral"
+              }
+            },
             "production": {
               "budgets": [
                 {

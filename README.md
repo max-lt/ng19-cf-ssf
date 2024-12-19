@@ -1,59 +1,100 @@
 # Ng19CfSsr
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.5.
+This project intends to demonstrate how to do an [Angular 9 application with server-side rendering (SSR) to Cloudflare Workers][1].
 
-## Development server
+## Step by step reproduction
 
-To start a local development server, run:
+### Create a new Angular project with the following options:
 
-```bash
-ng serve
+```
+ng new my-app \
+  --minimal \
+  --strict \
+  --routing \
+  --style=css \
+  --ssr \
+  --server-routing=false \
+  --experimental-zoneless
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Install Cloudflare Workers CLI
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- wrangler is the Cloudflare Workers CLI, it will allow us to run our worker locally
+- itty-router is a lightweight router for Workers
 
 ```bash
-ng generate --help
+npm i --save-dev wrangler itty-router
 ```
 
-## Building
+### Create a new Cloudflare Worker
 
-To build the project run:
+See [src/worker.ts](src/worker.ts) for the code.
+
+### Edit angular.json configuration
+
+See [angular.json](angular.json) for the configuration.
+
+```diff
+...
+"build": {
+  "builder": "@angular-devkit/build-angular:application",
+  "options": {
+-   "outputPath": "dist/my-app",
++   "outputPath": "dist",
+    "server": "src/main.server.ts",
+-   "prerender": true, /* For some reason, prerender doesn't works with MacOs */
++   "prerender": false,
+    "ssr": {
+      "entry": "src/server.ts"
+    },
+  },
+  "configurations": {
++    "worker": {
++      "tsConfig": "tsconfig.worker.json",
++      "ssr": {
++        "entry": "src/worker.ts",
++        "experimentalPlatform": "neutral"
++      }
++    },
+    "production": {
+  ...
+```
+
+### Add `tsconfig.worker.ts`
+
+Copy `tsconfig.app.json` to `tsconfig.worker.json` and edit it:
+
+```diff
+...
+  "files": [
+    "src/main.ts",
+    "src/main.server.ts",
+-   "src/server.ts"
++   "src/worker.ts"
+  ],
+...
+```
+
+### Build the worker
 
 ```bash
-ng build
+ng build --configuration worker
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+### Bundle the worker
 
 ```bash
-ng test
+npx esbuild --bundle dist/server/server.mjs \
+  --outfile=dist/browser/_worker.js \
+  --platform=browser \
+  --target=es2022 \
+  --format=esm
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+### Run the worker locally
 
 ```bash
-ng e2e
+npx wrangler pages dev dist/browser --port 4200 --compatibility-date=2024-12-05
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+[1]: https://www.lechat.dev/blog/2024/angular-ssr-with-cloudflare-pages-and-bun

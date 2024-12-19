@@ -5,6 +5,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:worker": "ng build --configuration worker",
+    "postbuild:worker": "npm run cf:bundle",
+    "cf:bundle": "esbuild --bundle dist/server/server.mjs --format=esm --platform=browser --target=es2022 --minify --outfile=dist/browser/_worker.js",
     "watch": "ng build --watch --configuration development",
     "serve:ssr:ng19-cf-ssr": "node dist/ng19-cf-ssr/server/server.mjs"
   },
@@ -31,6 +34,8 @@
     "@angular/compiler-cli": "^19.0.0",
     "@types/express": "^4.17.17",
     "@types/node": "^18.18.0",
-    "typescript": "~5.6.2"
+    "itty-router": "^5.0.18",
+    "typescript": "~5.6.2",
+    "wrangler": "^3.98.0"
   }
 }
